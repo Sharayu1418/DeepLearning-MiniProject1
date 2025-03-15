@@ -1,0 +1,148 @@
+How to Run the Code
+
+This section provides step-by-step instructions on how to set up, train, and evaluate the model, along with utilizing saved models for further training or inference.  
+
+---
+
+1. Downloading the Code
+
+To run the model, the code can be obtained in one of the following ways:  
+
+- **Clone the GitHub Repository** (Recommended)  
+  ```bash
+  git clone https://github.com/yourusername/ResNet-CIFAR10.git
+  cd ResNet-CIFAR10
+  ```
+- **Download Manually**  
+  1. Navigate to `https://github.com/yourusername/ResNet-CIFAR10`  
+  2. Click **"Code" → "Download ZIP"**, extract the files, and move to the extracted folder.
+
+---
+
+2. Installing Dependencies
+
+The project requires Python (preferably **Python 3.8+**) and several libraries. All dependencies are listed in `requirements.txt` and can be installed using:  
+
+```bash
+pip install -r requirements.txt
+```
+
+For a more isolated environment, a virtual environment can be created:  
+
+```bash
+python -m venv resnet_env
+source resnet_env/bin/activate  # macOS/Linux
+resnet_env\Scripts\activate  # Windows
+pip install -r requirements.txt
+```
+
+---
+
+3. Running the Code on Different Platforms
+
+The project can be executed on **local machines** as well as **cloud-based platforms** like **Kaggle** or **Google Colab**.
+
+#### **Running Locally (VS Code, Terminal, or Jupyter Notebook)**
+1. Open the project folder in **VS Code**, **Jupyter Notebook**, or any preferred editor.  
+2. If using Jupyter Notebook, launch the environment with:  
+   ```bash
+   jupyter notebook
+   ```
+3. If running a script, execute the training process with:  
+   ```bash
+   python train.py
+   ```
+4. Training progress, including loss and accuracy metrics, will be displayed in real time.
+
+#### **Running on Kaggle or Google Colab**
+1. Upload the project files to a **Kaggle Notebook** or **Google Colab** environment.  
+2. Install dependencies by running:  
+   ```python
+   !pip install -r requirements.txt
+   ```
+3. Set the runtime to **GPU** for faster training.  
+4. Execute the notebook cells sequentially to train the model.
+
+---
+
+4. Using Saved Models for Resuming Training or Inference
+
+#### **Saving the Model During Training**  
+The trained model is automatically saved in the `checkpoints/` directory. After training, it will be stored as:  
+```bash
+checkpoints/resnet_cifar10.pth
+```
+To manually save the model, the following command can be added to `train.py`:  
+```python
+torch.save(model.state_dict(), "checkpoints/resnet_cifar10.pth")
+```
+
+#### **Resuming Training from a Saved Model**  
+If training needs to be resumed from a checkpoint, the saved model weights can be loaded as follows:  
+
+```python
+import torch
+from model import ResNet  # Ensure correct model import
+
+# Initialize model
+model = ResNet()
+
+# Load the saved model
+model.load_state_dict(torch.load("checkpoints/resnet_cifar10.pth"))
+
+# Move model to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+```
+
+#### **Using the Saved Model for Inference**  
+A trained model can be used to classify new images without retraining. The following code performs inference on a single image:  
+
+```python
+import torch
+import torchvision.transforms as transforms
+from PIL import Image
+from model import ResNet
+
+# Load the trained model
+model = ResNet()
+model.load_state_dict(torch.load("checkpoints/resnet_cifar10.pth"))
+model.eval()
+
+# Define the preprocessing steps
+transform = transforms.Compose([
+    transforms.Resize((32, 32)),
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+])
+
+# Load and preprocess the image
+image = Image.open("path_to_image.jpg")  # Replace with actual image path
+image = transform(image).unsqueeze(0)
+
+# Perform prediction
+output = model(image)
+predicted_class = output.argmax(1).item()
+print(f"Predicted Class: {predicted_class}")
+```
+
+---
+
+5. Evaluating the Model Performance 
+
+To test the trained model on the **CIFAR-10 dataset**, the following command is used:  
+
+```bash
+python evaluate.py
+```
+
+This will output:
+- Final test accuracy
+- Confusion matrix
+- Classification report with precision, recall, and F1-score
+
+---
+
+### **Conclusion**  
+Following these instructions ensures that the model is correctly set up, trained, evaluated, and used for inference. The process is compatible with multiple platforms, and saved models can be used for further training or real-time predictions.
+
